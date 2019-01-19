@@ -1,2 +1,2 @@
 #!/bin/sh
-sudo dotnet my.dll
+sudo dotnet MinionBotForStreamersConsole.dll
