@@ -9,7 +9,8 @@ Tool to get stats from the current war of the Clash of Clans API
 6.  Save the key to clash api token.txt.
 7.  Restart Twitch_Overlay.exe
 
-It will now save statistics to documents\output in varios text files.  In OBS, set your scores and stats to read from files.
+It will now save statistics to documents\output in varios text files.
+In OBS, set your scores and stats to read from files.
 
 If you are apprehensive about running this, the source code is included.
 This is adapted from old versions of Minion Bot for Discord.
