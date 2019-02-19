@@ -8,10 +8,10 @@ Mac users may need to use the Terminal to open the file.\
 If opening this file does nothing, ensure you have .Net installed.\
     [Windows] MinionBotForTwitch.bat\
     [Mac]     MinionBotForTwitchMAC.sh
-4.  You will be prompted to enter your clan tag in the clantag.txt document.
-\Enter it and save the text file.
-5.  Navigate to developer.clashofclans.com, create an account, and create a key.
-\Use your router's external IP address when making the key.
+4.  You will be prompted to enter your clan tag in the clantag.txt document.\
+Enter it and save the text file.
+5.  Navigate to developer.clashofclans.com, create an account, and create a key.\
+Use your router's external IP address when making the key.
 6.  Save the key to clash api token.txt.
 7.  Restart the program.
 
