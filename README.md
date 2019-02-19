@@ -20,7 +20,7 @@ In OBS, set your scores and stats to read from files.
 
 If you are apprehensive about running this, the source code is included.\
 This is adapted from old versions of Minion Bot for Discord.\
-This is not exactly well written, so I don't recommend you base your code off of this.\
+This is not exactly well written, so I don't recommend you base your code off of this.
 
 I would appreciate shout outs in your stream.
 
