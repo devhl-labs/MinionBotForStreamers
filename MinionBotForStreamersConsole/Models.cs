@@ -7,7 +7,7 @@ using System.Text;
 namespace TwitchOverlayConsoleAppCore
 {
     #region current war
-    public class war
+    public class War
     {
         public string state { get; set; }
         public int teamSize { get; set; }
@@ -15,9 +15,41 @@ namespace TwitchOverlayConsoleAppCore
         public string startTime { get; set; }
         public string endTime { get; set; }
         public bool timersSet { get; set; }
-        public Clan clan { get; set; }
-        public Opponent opponent { get; set; }
+        private Clan _clan;
+
+        public Clan clan
+        {
+            get
+            {
+                return _clan;
+            }
+
+            set
+            {
+                _clan = value;
+                clans.Add(_clan);
+                clans = clans.OrderBy(c => c.tag).ToList();
+            }
+        }
+        private Clan _opponent;
+
+        public Clan opponent
+        {
+            get
+            {
+                return _opponent;
+            }
+
+            set
+            {
+                _opponent = value;
+                clans.Add(_opponent);
+                clans = clans.OrderBy(c => c.tag).ToList();
+            }
+        }
         public DateTime DateUpdated { get; set; }
+
+        public List<Clan> clans { get; private set; } = new List<Clan>();
 
     }
 
@@ -25,7 +57,7 @@ namespace TwitchOverlayConsoleAppCore
     {
         public string tag { get; set; }
         public string name { get; set; }
-        public Badgeurls1 badgeUrls { get; set; }
+        public Badgeurls badgeUrls { get; set; }
         public int clanLevel { get; set; }
         public int attacks { get; set; }
         public int stars { get; set; }
@@ -34,7 +66,7 @@ namespace TwitchOverlayConsoleAppCore
         public List<Members> member { get; set; }
     }
 
-    public class Badgeurls1
+    public class Badgeurls
     {
         public string small { get; set; }
         public string large { get; set; }
@@ -72,56 +104,56 @@ namespace TwitchOverlayConsoleAppCore
         public int manualOrder { get; set; }
     }
 
-    public class Opponent
-    {
-        public string tag { get; set; }
-        public string name { get; set; }
-        public Badgeurls2 badgeUrls { get; set; }
-        public int clanLevel { get; set; }
-        public int attacks { get; set; }
-        public int stars { get; set; }
-        public float destructionPercentage { get; set; }
-        [JsonProperty(PropertyName = "members")]
-        public List<Members1> member { get; set; }
-    }
+    //public class Opponent
+    //{
+    //    public string tag { get; set; }
+    //    public string name { get; set; }
+    //    public Badgeurls2 badgeUrls { get; set; }
+    //    public int clanLevel { get; set; }
+    //    public int attacks { get; set; }
+    //    public int stars { get; set; }
+    //    public float destructionPercentage { get; set; }
+    //    [JsonProperty(PropertyName = "members")]
+    //    public List<Members1> member { get; set; }
+    //}
 
-    public class Badgeurls2
-    {
-        public string small { get; set; }
-        public string large { get; set; }
-        public string medium { get; set; }
-    }
+    //public class Badgeurls2
+    //{
+    //    public string small { get; set; }
+    //    public string large { get; set; }
+    //    public string medium { get; set; }
+    //}
 
-    public class Members1
-    {
-        public string tag { get; set; }
-        public string name { get; set; }
-        public int townhallLevel { get; set; }
-        public int mapPosition { get; set; }
-        public int opponentAttacks { get; set; }
-        public Bestopponentattack1 bestOpponentAttack { get; set; }
-        [JsonProperty(PropertyName = "attacks")]
-        public List<Attacks1> attack { get; set; }
-    }
+    //public class Members1
+    //{
+    //    public string tag { get; set; }
+    //    public string name { get; set; }
+    //    public int townhallLevel { get; set; }
+    //    public int mapPosition { get; set; }
+    //    public int opponentAttacks { get; set; }
+    //    public Bestopponentattack1 bestOpponentAttack { get; set; }
+    //    [JsonProperty(PropertyName = "attacks")]
+    //    public List<Attacks1> attack { get; set; }
+    //}
 
-    public class Bestopponentattack1
-    {
-        public string attackerTag { get; set; }
-        public string defenderTag { get; set; }
-        public int stars { get; set; }
-        public int destructionPercentage { get; set; }
-        public int order { get; set; }
-    }
+    //public class Bestopponentattack1
+    //{
+    //    public string attackerTag { get; set; }
+    //    public string defenderTag { get; set; }
+    //    public int stars { get; set; }
+    //    public int destructionPercentage { get; set; }
+    //    public int order { get; set; }
+    //}
 
-    public class Attacks1
-    {
-        public string attackerTag { get; set; }
-        public string defenderTag { get; set; }
-        public int stars { get; set; }
-        public int destructionPercentage { get; set; }
-        public int order { get; set; }
-        public int manualOrder { get; set; }
-    }
+    //public class Attacks1
+    //{
+    //    public string attackerTag { get; set; }
+    //    public string defenderTag { get; set; }
+    //    public int stars { get; set; }
+    //    public int destructionPercentage { get; set; }
+    //    public int order { get; set; }
+    //    public int manualOrder { get; set; }
+    //}
 
 
     #endregion
@@ -141,35 +173,39 @@ namespace TwitchOverlayConsoleAppCore
 
     public class WarStats
     {
+        public WarStats(string clanTag)
+        {
+            ClanTag = clanTag;
+        }
 
-        public void Process(war war, int p)
+        public void Process(War war, int p)
         {
             try
             {
-                twelveLeft = war.clan.member.Where(a => a.townhallLevel == 12).Count() * 2;
-                elevenLeft = war.clan.member.Where(a => a.townhallLevel == 11).Count() * 2;
-                tenLeft = war.clan.member.Where(a => a.townhallLevel == 10).Count() * 2;
-                nineLeft = war.clan.member.Where(a => a.townhallLevel == 9).Count() * 2;
+                twelveLeft = war.clans.First(c => c.tag == ClanTag).member.Where(a => a.townhallLevel == 12).Count() * 2;
+                elevenLeft = war.clans.First(c => c.tag == ClanTag).member.Where(a => a.townhallLevel == 11).Count() * 2;
+                tenLeft = war.clans.First(c => c.tag == ClanTag).member.Where(a => a.townhallLevel == 10).Count() * 2;
+                nineLeft = war.clans.First(c => c.tag == ClanTag).member.Where(a => a.townhallLevel == 9).Count() * 2;
                 //eightLeft = saved.war.clan.member.Where(a => a.townhallLevel == 8).Count() * 2;
 
-                twelveLeftE = war.opponent.member.Where(a => a.townhallLevel == 12).Count() * 2;
-                elevenLeftE = war.opponent.member.Where(a => a.townhallLevel == 11).Count() * 2;
-                tenLeftE = war.opponent.member.Where(a => a.townhallLevel == 10).Count() * 2;
-                nineLeftE = war.opponent.member.Where(a => a.townhallLevel == 9).Count() * 2;
+                twelveLeftE = war.clans.First(c => c.tag != ClanTag).member.Where(a => a.townhallLevel == 12).Count() * 2;
+                elevenLeftE = war.clans.First(c => c.tag != ClanTag).member.Where(a => a.townhallLevel == 11).Count() * 2;
+                tenLeftE = war.clans.First(c => c.tag != ClanTag).member.Where(a => a.townhallLevel == 10).Count() * 2;
+                nineLeftE = war.clans.First(c => c.tag != ClanTag).member.Where(a => a.townhallLevel == 9).Count() * 2;
                 //eightLeft = saved.war.opponent.member.Where(a => a.townhallLevel == 8).Count() * 2;
 
                 decimal DestructionSum = 0;
                 decimal DestructionSumE = 0;
                 int maxOrder = 0;
 
-                nines = war.clan.member.Where(a => a.townhallLevel == 9).Count();
-                ninesE = war.opponent.member.Where(a => a.townhallLevel == 9).Count();
-                tens = war.clan.member.Where(a => a.townhallLevel == 10).Count();
-                tensE = war.opponent.member.Where(a => a.townhallLevel == 10).Count();
-                elevens = war.clan.member.Where(a => a.townhallLevel == 11).Count();
-                elevensE = war.opponent.member.Where(a => a.townhallLevel == 11).Count();
-                twelves = war.clan.member.Where(a => a.townhallLevel == 12).Count();
-                twelvesE = war.opponent.member.Where(a => a.townhallLevel == 12).Count();
+                nines = war.clans.First(c => c.tag == ClanTag).member.Where(a => a.townhallLevel == 9).Count();
+                ninesE = war.clans.First(c => c.tag != ClanTag).member.Where(a => a.townhallLevel == 9).Count();
+                tens = war.clans.First(c => c.tag == ClanTag).member.Where(a => a.townhallLevel == 10).Count();
+                tensE = war.clans.First(c => c.tag != ClanTag).member.Where(a => a.townhallLevel == 10).Count();
+                elevens = war.clans.First(c => c.tag == ClanTag).member.Where(a => a.townhallLevel == 11).Count();
+                elevensE = war.clans.First(c => c.tag != ClanTag).member.Where(a => a.townhallLevel == 11).Count();
+                twelves = war.clans.First(c => c.tag == ClanTag).member.Where(a => a.townhallLevel == 12).Count();
+                twelvesE = war.clans.First(c => c.tag != ClanTag).member.Where(a => a.townhallLevel == 12).Count();
 
                 #region old code to compute enemy stats
                 ////compute enemy stats
@@ -231,23 +267,23 @@ namespace TwitchOverlayConsoleAppCore
                 #endregion
                 //compute enemy stats
                 List<stats> enemyAttacks = new List<stats>();
-                foreach (Members1 enemy in (war.opponent.member ?? new List<Members1>()))
+                foreach (Members enemy in (war.clans.First(c => c.tag != ClanTag).member ?? new List<Members>()))
                 {
-                    foreach (Attacks1 attack in (enemy.attack ?? new List<Attacks1>()))
+                    foreach (Attacks attack in (enemy.attack ?? new List<Attacks>()))
                     {
                         stats b = new stats();
                         b.destructionPercentage = attack.destructionPercentage;
-                        b.enemyTH = war.opponent.member.Where(x => x.tag == attack.attackerTag).FirstOrDefault().townhallLevel; //GetEnemyTh(attack.attackerTag, saved);
-                        b.friendlyTH = war.clan.member.Where(x => x.tag == attack.defenderTag).FirstOrDefault().townhallLevel; //GetFriendlyTh(attack.defenderTag, saved);
+                        b.enemyTH = war.clans.First(c => c.tag != ClanTag).member.Where(x => x.tag == attack.attackerTag).FirstOrDefault().townhallLevel; //GetEnemyTh(attack.attackerTag, saved);
+                        b.friendlyTH = war.clans.First(c => c.tag == ClanTag).member.Where(x => x.tag == attack.defenderTag).FirstOrDefault().townhallLevel; //GetFriendlyTh(attack.defenderTag, saved);
                         b.stars = attack.stars;
                         b.attackerTag = attack.attackerTag;
                         b.defenderTag = attack.defenderTag;
-                        b.mapPosition = war.clan.member.Where(c => c.tag == attack.defenderTag).First().mapPosition;
+                        b.mapPosition = war.clans.First(c => c.tag == ClanTag).member.Where(c => c.tag == attack.defenderTag).First().mapPosition;
                         enemyAttacks.Add(b);
                     }
                 }
 
-                foreach (Members friend in war.clan.member)
+                foreach (Members friend in war.clans.First(c => c.tag == ClanTag).member)
                 {
                     bool found = false;
                     foreach (stats a in (enemyAttacks ?? new List<stats>()).Where(a => a.defenderTag == friend.tag).OrderByDescending(a => a.stars).ThenByDescending(a => a.destructionPercentage))
@@ -392,23 +428,23 @@ namespace TwitchOverlayConsoleAppCore
 
                 //compute friendly stats
                 List<stats> friendAttacks = new List<stats>();
-                foreach (Members friend in (war.clan.member ?? new List<Members>()))
+                foreach (Members friend in (war.clans.First(c => c.tag == ClanTag).member ?? new List<Members>()))
                 {
                     foreach (Attacks attack in (friend.attack ?? new List<Attacks>()))
                     {
                         stats b = new stats();
                         b.destructionPercentage = attack.destructionPercentage;
-                        b.enemyTH = war.opponent.member.Where(x => x.tag == attack.defenderTag).FirstOrDefault().townhallLevel; //GetEnemyTh(attack.defenderTag, saved);
-                        b.friendlyTH = war.clan.member.Where(x => x.tag == attack.attackerTag).FirstOrDefault().townhallLevel; //GetFriendlyTh(attack.attackerTag, saved);
+                        b.enemyTH = war.clans.First(c => c.tag != ClanTag).member.Where(x => x.tag == attack.defenderTag).FirstOrDefault().townhallLevel; //GetEnemyTh(attack.defenderTag, saved);
+                        b.friendlyTH = war.clans.First(c => c.tag == ClanTag).member.Where(x => x.tag == attack.attackerTag).FirstOrDefault().townhallLevel; //GetFriendlyTh(attack.attackerTag, saved);
                         b.stars = attack.stars;
                         b.attackerTag = attack.attackerTag;
                         b.defenderTag = attack.defenderTag;
-                        b.mapPosition = war.opponent.member.Where(c => c.tag == attack.defenderTag).First().mapPosition;
+                        b.mapPosition = war.clans.First(c => c.tag != ClanTag).member.Where(c => c.tag == attack.defenderTag).First().mapPosition;
                         friendAttacks.Add(b);
                     }
                 }
 
-                foreach (Members1 enemy in war.opponent.member)
+                foreach (Members enemy in war.clans.First(c => c.tag != ClanTag).member)
                 {
                     bool found = false;
                     foreach (stats a in (friendAttacks ?? new List<stats>()).Where(a => a.defenderTag == enemy.tag).OrderByDescending(a => a.stars).ThenByDescending(a => a.destructionPercentage))
@@ -561,6 +597,7 @@ namespace TwitchOverlayConsoleAppCore
 
         }
 
+        public string ClanTag { get; private set; }
         public string WarId { get; set; }
         public int OrderOfLastAttack { get; set; }
         public bool DownloadedFromSC { get; set; }

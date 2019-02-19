@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,14 +39,9 @@ namespace TwitchOverlayConsoleAppCore
 
                 var directory = System.IO.Path.GetDirectoryName(path);
 
-                //if (!Directory.Exists(Path.Combine(directory, $"{Path.DirectorySeparatorChar}documents")))
-                //{
+
                 Directory.CreateDirectory(Path.Combine(directory, "documents"));
-                //}
-                //if (!Directory.Exists(Path.Combine(directory, $"{Path.DirectorySeparatorChar}documents", $"{Path.DirectorySeparatorChar}output")))
-                //{
                 Directory.CreateDirectory(Path.Combine(directory, "documents", "output"));
-                //}
 
                 if (!File.Exists(directory + $"{Path.DirectorySeparatorChar}documents{Path.DirectorySeparatorChar}clantag.txt"))
                 {
@@ -55,10 +51,28 @@ namespace TwitchOverlayConsoleAppCore
                 {
                     File.WriteAllText(Path.Combine(directory, "documents", "clash api token.txt"), "");
                 }
+                if (!File.Exists(directory + $"{Path.DirectorySeparatorChar}documents{Path.DirectorySeparatorChar}wartag.txt"))
+                {
+                    File.WriteAllText(Path.Combine(directory, "documents", "wartag.txt"), "");
+                }
 
                 string clanTag = File.ReadAllText(directory + $"{Path.DirectorySeparatorChar}documents{Path.DirectorySeparatorChar}clantag.txt");
                 string clashToken = File.ReadAllText(directory + $"{Path.DirectorySeparatorChar}documents{Path.DirectorySeparatorChar}clash api token.txt");
-                string url = $"https://api.clashofclans.com/v1/clans/" + clanTag.Replace("#", "%23") + "/currentwar";
+                string warTag = File.ReadAllText(directory + $"{Path.DirectorySeparatorChar}documents{Path.DirectorySeparatorChar}wartag.txt");
+
+
+                string url = "";
+
+                if (string.IsNullOrEmpty(warTag))
+                {
+                    url = $"https://api.clashofclans.com/v1/clans/" + clanTag.Replace("#", "%23") + "/currentwar";
+                }
+                else
+                {
+                    Console.WriteLine("Using warTag " + warTag);
+                    url = $"https://api.clashofclans.com/v1/clanwarleagues/wars/" + warTag.Replace("#", "%23");
+                }
+
                 string docs = directory + $"{Path.DirectorySeparatorChar}documents{Path.DirectorySeparatorChar}output{Path.DirectorySeparatorChar}";
 
                 if (clanTag == "")
@@ -99,9 +113,9 @@ namespace TwitchOverlayConsoleAppCore
                     }
                 }
 
-                war war = JsonConvert.DeserializeObject<war>(json.ToString());
-                Console.WriteLine("attacks: " + war.clan.attacks + " || defenses: " + war.opponent.attacks);
-                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}clan.txt", war.clan.name);
+                War war = JsonConvert.DeserializeObject<War>(json.ToString());
+                Console.WriteLine("attacks: " + war.clans.First(c => c.tag == clanTag).attacks + " || defenses: " + war.clans.First(c => c.tag != clanTag).attacks);
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}clan.txt", war.clans.First(c => c.tag == clanTag).name);
 
                 //used to determine how many digits after the decimal
                 //acceptable values are 0, 1, 2, or 3
@@ -155,30 +169,30 @@ namespace TwitchOverlayConsoleAppCore
                 //only download the images if the enemy name is different
                 if (File.Exists(docs + $"{Path.DirectorySeparatorChar}clanE.txt"))
                 {
-                    if (File.ReadAllText(docs + $"{Path.DirectorySeparatorChar}clanE.txt") != war.opponent.name)
+                    if (File.ReadAllText(docs + $"{Path.DirectorySeparatorChar}clanE.txt") != war.clans.First(c => c.tag != clanTag).name)
                     {
                         WebClient webClient = new WebClient();
-                        webClient.DownloadFile(war.opponent.badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shieldE.png");
-                        webClient.DownloadFile(war.clan.badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shield.png");
+                        webClient.DownloadFile(war.clans.First(c => c.tag != clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shieldE.png");
+                        webClient.DownloadFile(war.clans.First(c => c.tag == clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shield.png");
                     }
                 }
                 else
                 {
                     WebClient webClient = new WebClient();
-                    webClient.DownloadFile(war.opponent.badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shieldE.png");
-                    webClient.DownloadFile(war.clan.badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shield.png");
+                    webClient.DownloadFile(war.clans.First(c => c.tag != clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shieldE.png");
+                    webClient.DownloadFile(war.clans.First(c => c.tag == clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shield.png");
                 }
 
 
-                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}clanE.txt", war.opponent.name);
-                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}attacks.txt", war.clan.attacks.ToString());
-                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}attacksE.txt", war.opponent.attacks.ToString());
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}clanE.txt", war.clans.First(c => c.tag != clanTag).name);
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}attacks.txt", war.clans.First(c => c.tag == clanTag).attacks.ToString());
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}attacksE.txt", war.clans.First(c => c.tag != clanTag).attacks.ToString());
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}start time.txt", war.startTime);
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}prep time.txt", war.preparationStartTime);
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}end time.txt", war.endTime);
 
 
-                WarStats ws = new WarStats();
+                WarStats ws = new WarStats(clanTag);
                 ws.Process(war, precision);
 
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}nines.txt", ws.nines.ToString());
