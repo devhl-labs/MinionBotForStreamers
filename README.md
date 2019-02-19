@@ -3,7 +3,8 @@ Tool to get stats from the current war of the Clash of Clans API
 
 1.  Download ZIP file from GitHuib
 2.  Extract the ZIP folder
-3.  In the extracted folder, open the following file.  Mac users may need to use the Terminal to open the file.  If opening this file does nothing, ensure you have .Net installed.\
+3.  In the extracted folder, open the following file.  Mac users may need to use the Terminal to open the file.\
+If opening this file does nothing, ensure you have .Net installed.\
     [Windows] MinionBotForTwitch.bat\
     [Mac]     MinionBotForTwitchMAC.sh
 4.  You will be prompted to enter your clan tag in the clantag.txt document.  Enter it and save the text file.
