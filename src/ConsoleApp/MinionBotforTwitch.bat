@@ -1,0 +1,1 @@
+dotnet MinionBotForStreamersConsole.dll
