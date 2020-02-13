@@ -3,9 +3,9 @@ Tool to get stats from the current war of the Clash of Clans API
 
 1.  Download ZIP file from GitHub
 2.  Extract the ZIP folder
-3.  In the extracted folder open \ 
-    [Windows] Minion Bot.exe \ 
-    [Mac]     Minion Bot \ 
+3.  In the extracted folder open\ 
+    [Windows] Minion Bot.exe\ 
+    [Mac]     Minion Bot\ 
 4.  You will be prompted to enter your clan tag in the clantag.txt document.\
 Enter it and save the text file.
 5.  Navigate to developer.clashofclans.com, create an account, and create a key.\
