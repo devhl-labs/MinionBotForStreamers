@@ -1,4 +1,4 @@
-# Minion-Bot-For-Streamers
+# Minion Bot For Streamers
 Tool to get stats from the current war of the Clash of Clans API
 
 1.  Download ZIP file from GitHub
