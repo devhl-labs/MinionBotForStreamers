@@ -77,7 +77,7 @@ namespace TwitchOverlayConsoleAppCore
 
                 if (clanTag == "")
                 {
-                    Console.WriteLine("Please enter your clan tag.");
+                    Console.WriteLine("Please enter your clan tag in clantag.txt.");
                     if (!folderOpened)
                     {
                         System.Diagnostics.Process.Start("explorer.exe", directory + $"{Path.DirectorySeparatorChar}documents");
@@ -114,6 +114,14 @@ namespace TwitchOverlayConsoleAppCore
                 }
 
                 War war = JsonConvert.DeserializeObject<War>(json.ToString());
+
+                if (war.clans.All(c => c.tag == null))
+                {
+                    Console.WriteLine("This clan is not in war.");
+
+                    return;
+                }
+
                 Console.WriteLine("attacks: " + war.clans.First(c => c.tag == clanTag).attacks + " || defenses: " + war.clans.First(c => c.tag != clanTag).attacks);
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}clan.txt", war.clans.First(c => c.tag == clanTag).name);
 

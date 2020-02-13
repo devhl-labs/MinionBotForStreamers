@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <ApplicationIcon>twitch.ico</ApplicationIcon>
+    <ApplicationIcon>mb256.ico</ApplicationIcon>
     <AssemblyName>Minion Bot</AssemblyName>
   </PropertyGroup>
 
