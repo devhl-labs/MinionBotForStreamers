@@ -13,7 +13,7 @@ Use your router's external IP address when making the key.
 6.  Save the key to clash api token.txt.
 7.  Restart the program.
 
-It will now save statistics to documents\output in varios text files.\
+It will now save statistics to documents\output in various text files.\
 In OBS, set your scores and stats to read from files.
 
 This is adapted from old versions of Minion Bot for Discord.\
