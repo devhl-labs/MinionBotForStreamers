@@ -144,6 +144,12 @@ namespace TwitchOverlayConsoleAppCore
                     case "2":
                         precision = 2;
                         break;
+                    case "3":
+                        precision = 3;
+                        break;
+                    case "4":
+                        precision = 4;
+                        break;
                     default:
                         precision = 2;
                         File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}digits after decimal.txt", "2");
@@ -198,7 +204,11 @@ namespace TwitchOverlayConsoleAppCore
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}start time.txt", war.startTime);
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}prep time.txt", war.preparationStartTime);
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}end time.txt", war.endTime);
-
+                
+                string percent = string.Empty;
+                if (includeSign) percent = "%";
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}destruction.txt", $"{war.clans.First(c => c.tag == clanTag).destructionPercentage}{percent}");
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}destructionE.txt", $"{war.clans.First(c => c.tag != clanTag).destructionPercentage}{percent}");
 
                 WarStats ws = new WarStats(clanTag);
                 ws.Process(war, precision);

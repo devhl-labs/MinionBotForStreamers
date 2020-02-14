@@ -61,7 +61,7 @@ namespace TwitchOverlayConsoleAppCore
         public int clanLevel { get; set; }
         public int attacks { get; set; }
         public int stars { get; set; }
-        public float destructionPercentage { get; set; }
+        public decimal destructionPercentage { get; set; }
         [JsonProperty(PropertyName = "members")]
         public List<Members> member { get; set; }
     }
