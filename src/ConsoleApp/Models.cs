@@ -305,6 +305,8 @@ namespace TwitchOverlayConsoleAppCore
                             if (friend.townhallLevel == 11 && a.stars == 2) { elevenTwoE += 1; }
                             if (friend.townhallLevel == 10 && a.stars == 3) { tenThreeE += 1; }
                             if (friend.townhallLevel == 10 && a.stars == 2) { tenTwoE += 1; }
+                            if (friend.townhallLevel == 9 && a.stars == 3) { nineThreeE += 1; }
+                            if (friend.townhallLevel == 9 && a.stars == 2) { nineTwoE += 1; }
 
                         }
                         if (a.enemyTH == 13) { thirteenLeftE -= 1; }
@@ -546,6 +548,8 @@ namespace TwitchOverlayConsoleAppCore
                             if (enemy.townhallLevel == 11 && a.stars == 2) { elevenTwo += 1; }
                             if (enemy.townhallLevel == 10 && a.stars == 3) { tenThree += 1; }
                             if (enemy.townhallLevel == 10 && a.stars == 2) { tenTwo += 1; }
+                            if (enemy.townhallLevel == 9 && a.stars == 3) { nineThree += 1; }
+                            if (enemy.townhallLevel == 9 && a.stars == 2) { nineTwo += 1; }
                         }
                         if (a.friendlyTH == 13) { thirteenLeft -= 1; }
                         if (a.friendlyTH == 12) { twelveLeft -= 1; }
