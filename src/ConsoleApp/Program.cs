@@ -303,6 +303,20 @@ namespace TwitchOverlayConsoleAppCore
 
 
 
+
+
+
+
+
+
+
+
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}9 two.txt", ws.nineTwo.ToString());
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}9 twoE.txt", ws.nineTwoE.ToString());
+
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}9 three.txt", ws.nineThree.ToString());
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}9 threeE.txt", ws.nineThreeE.ToString());
+
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}10 two.txt", ws.tenTwo.ToString());
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}10 twoE.txt", ws.tenTwoE.ToString());
 

@@ -778,6 +778,13 @@ namespace TwitchOverlayConsoleAppCore
         public int elevenTwo { get; set; }
         public int elevenTwoE { get; set; }
 
+
+        public int nineThree { get; set; }
+        public int nineThreeE { get; set; }
+        public int nineTwo { get; set; }
+        public int nineTwoE { get; set; }
+
+
         public int tenThree { get; set; }
         public int tenThreeE { get; set; }
         public int tenTwo { get; set; }
