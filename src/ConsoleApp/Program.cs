@@ -181,20 +181,31 @@ namespace TwitchOverlayConsoleAppCore
                 }
 
                 //only download the images if the enemy name is different
-                if (File.Exists(docs + $"{Path.DirectorySeparatorChar}clanE.txt"))
+                WebClient webClient = new WebClient();
+
+                try
                 {
-                    if (File.ReadAllText(docs + $"{Path.DirectorySeparatorChar}clanE.txt") != war.clans.First(c => c.tag != clanTag).name)
+                    if (File.Exists(docs + $"{Path.DirectorySeparatorChar}clanE.txt"))
                     {
-                        WebClient webClient = new WebClient();
+                        if (File.ReadAllText(docs + $"{Path.DirectorySeparatorChar}clanE.txt") != war.clans.First(c => c.tag != clanTag).name)
+                        {
+                            webClient.DownloadFile(war.clans.First(c => c.tag != clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shieldE.png");
+                            webClient.DownloadFile(war.clans.First(c => c.tag == clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shield.png");
+                        }
+                    }
+                    else
+                    {
                         webClient.DownloadFile(war.clans.First(c => c.tag != clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shieldE.png");
                         webClient.DownloadFile(war.clans.First(c => c.tag == clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shield.png");
                     }
                 }
-                else
+                catch (Exception)
                 {
-                    WebClient webClient = new WebClient();
-                    webClient.DownloadFile(war.clans.First(c => c.tag != clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shieldE.png");
-                    webClient.DownloadFile(war.clans.First(c => c.tag == clanTag).badgeUrls.large, docs + $"{Path.DirectorySeparatorChar}shield.png");
+                    Console.WriteLine("An error occured downloading a clan shield.");
+                }
+                finally
+                {
+                    webClient.Dispose();
                 }
 
 
