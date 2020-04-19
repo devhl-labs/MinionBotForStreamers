@@ -13,6 +13,9 @@ Use your router's external IP address when making the key.
 6.  Save the key to clash api token.txt.
 7.  Restart the program.
 
+## Help  
+![Discord Banner 2](https://discordapp.com/api/guilds/701245583444279328/widget.png?style=banner2)
+
 It will now save statistics to documents\output in various text files.\
 In OBS, set your scores and stats to read from files.
 
