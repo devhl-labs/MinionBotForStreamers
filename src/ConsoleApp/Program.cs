@@ -45,7 +45,6 @@ namespace TwitchOverlayConsoleAppCore
             try
             {
                 Update(false);
-                throw new Exception();
             }
             catch (Exception err)
             {
