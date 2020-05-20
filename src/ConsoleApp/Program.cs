@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+//using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace TwitchOverlayConsoleAppCore
 {
@@ -12,14 +14,21 @@ namespace TwitchOverlayConsoleAppCore
     {
         public static void Main(string[] args) => new Program().Start().GetAwaiter().GetResult();
 
+        public static Timer timer;
+
         public async Task Start()
         {
-            var timer = new System.Threading.Timer(e => Update(false), null, TimeSpan.Zero, TimeSpan.FromMinutes(2));
+            //this is horrible code, do not copy it
+
+            timer = new Timer(60000); // new Timer(e => Update(false), null, TimeSpan.Zero, TimeSpan.FromMinutes(2));
+            timer.Elapsed += OnTimerEvent;
+            timer.Enabled = true;
             GC.KeepAlive(timer);
             ConsoleKeyInfo cki;
             Console.TreatControlCAsInput = true;
             Console.WriteLine(@"https://github.com/devhl-labs/MinionBotForStreamers");
             Console.WriteLine("Press any key to update...");
+            Update(false);
             do
             {
                 cki = Console.ReadKey();
@@ -31,10 +40,25 @@ namespace TwitchOverlayConsoleAppCore
             await Task.Delay(-1);
         }
 
-        public static void Update(bool folderOpened)
+        private void OnTimerEvent(object sender, ElapsedEventArgs e)
         {
             try
             {
+                Update(false);
+                throw new Exception();
+            }
+            catch (Exception err)
+            {
+                Console.WriteLine(err.Message);
+
+                timer.Enabled = true;
+            }
+        }
+
+        public static void Update(bool folderOpened)
+        {
+            //try
+            //{
                 string path = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
                 var directory = System.IO.Path.GetDirectoryName(path);
@@ -99,6 +123,8 @@ namespace TwitchOverlayConsoleAppCore
 
                 var json = GetData(url, clashToken);
 
+                File.WriteAllText(directory + $"{Path.DirectorySeparatorChar}documents{Path.DirectorySeparatorChar}output{Path.DirectorySeparatorChar}war.json", json);
+
                 if (json.Substring(0, 3) == "err")
                 {
                     if (json.ToString() == "err" + "The remote server returned an error: (403) Forbidden.")
@@ -122,7 +148,7 @@ namespace TwitchOverlayConsoleAppCore
                     return;
                 }
 
-                Console.WriteLine("attacks: " + war.clans.First(c => c.tag == clanTag).attacks + " || defenses: " + war.clans.First(c => c.tag != clanTag).attacks);
+                Console.WriteLine(DateTime.Now.ToShortTimeString() + " attacks: " + war.clans.First(c => c.tag == clanTag).attacks + " | " + war.clans.First(c => c.tag != clanTag).attacks);
                 File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}clan.txt", war.clans.First(c => c.tag == clanTag).name);
 
                 //used to determine how many digits after the decimal
@@ -381,12 +407,13 @@ namespace TwitchOverlayConsoleAppCore
 
                 ws = null;
 
-                Console.WriteLine("Updated " + DateTime.Now.ToString());
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+                //Console.WriteLine("Updated " + DateTime.Now.ToString());
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e.Message);
+            //    timer.Enabled = true;
+            //}
         }
 
         private static string DecimalToString(decimal d, int p, bool sign)
