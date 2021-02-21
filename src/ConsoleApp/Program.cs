@@ -243,8 +243,8 @@ namespace TwitchOverlayConsoleAppCore
                 
                 string percent = string.Empty;
                 if (includeSign) percent = "%";
-                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}destruction.txt", $"{war.clans.First(c => c.tag == clanTag).destructionPercentage}{percent}");
-                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}destructionE.txt", $"{war.clans.First(c => c.tag != clanTag).destructionPercentage}{percent}");
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}destruction.txt", $"{DecimalToString(war.clans.First(c => c.tag == clanTag).destructionPercentage, precision, false)}{percent}");
+                File.WriteAllText(docs + $"{Path.DirectorySeparatorChar}destructionE.txt", $"{DecimalToString(war.clans.First(c => c.tag != clanTag).destructionPercentage, precision, false)}{percent}");
 
                 WarStats ws = new WarStats(clanTag);
                 ws.Process(war, precision);
