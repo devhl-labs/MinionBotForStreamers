@@ -12,7 +12,7 @@ Tool to get stats from the current war of the Clash of Clans API
 6.  Press 1 to add your clan. You will need to provide a clan tag and a clan name.
 7.  Restart the program.
 
-It will now save statistics to %APPDATA\MinionBot.Streamers.\
+It will now save statistics to %APPDATA%\MinionBot.Streamers.\
 To see the exact folder path, press 5 to go to settings and it will display the path.
 In OBS, set your scores and stats to read from files.
 
