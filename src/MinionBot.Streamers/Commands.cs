@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,11 +32,13 @@ namespace MinionBot.Streamers
                 {
                     try
                     {
-                        LogService.LogLine("1. Add a clan\n2. Remove a clan\n3. Start polling\n4. Stop polling\n5. Settings\n6. Quit\nChoose an option:");
+                        LogService.LogLine("1. Add a clan\n2. Remove a clan\n3. Start polling\n4. Stop polling\n5. Settings\n6. View all clans\n7. Quit\nChoose an option:");
 
-                        ConsoleKeyInfo inputInfo = Console.ReadKey();
+                        //ConsoleKeyInfo inputInfo = Console.ReadKey();
 
-                        string input = inputInfo.KeyChar.ToString();
+                        //string input = inputInfo.KeyChar.ToString();
+
+                        string? input = Console.ReadLine();
 
                         LogService.LogLine("");
 
@@ -46,21 +49,40 @@ namespace MinionBot.Streamers
                             if (!Clash.TryFormatTag(tag, out string? formattedTag))
                                 throw new Exception("Invalid tag");
 
-                            if (_options.Value.Clans.Any(c => c.Tag == formattedTag))
-                                throw new Exception("This clan tag is already entered.");
+                            ClanOption? exists = _options.Value.Clans.FirstOrDefault(c => c.Tag == formattedTag);
 
-                            string name = GetStringInput("Enter the clan name. This will be used as the name of the folder. Use valid characters for your operating system.");
+                            if (exists != null)
+                            {
+                                LogService.LogLine(
+$"This clan tag is already entered. The folder name is { _options.Value.Clans.First(c => c.Tag == formattedTag).Folder ?? "null" }. Enter the new folder name, or just press enter.");
 
-                            if (_options.Value.Clans.Any(c => c.Name == name))
-                                throw new Exception("This clan name is already entered.");
+                                string? newFolderName = Console.ReadLine();
 
-                            _options.Value.Clans.Add(new ClanOption(formattedTag, name));
+                                if (newFolderName != null)
+                                {
+                                    foreach (ClanOption clanOption in _options.Value.Clans.Where(c => c.Folder?.ToLower() == newFolderName.ToLower()))
+                                        clanOption.Folder = null;
 
-                            _options.Value.Write();
+                                    exists.Folder = newFolderName;
 
-                            await _clansClient.AddOrUpdateAsync(formattedTag, false, true, false, true, false);
+                                    _options.Value.Write();
+                                }
+                            }
+                            else
+                            {
+                                string name = GetStringInput("Enter the clan name. This will be used as the name of the folder. Case is insensitive. Use valid characters for your operating system. If you will be changing clans often you can just use a generic folder name like 'clan a'");
 
-                            LogService.LogLine($"Added { formattedTag } { name }");
+                                foreach (ClanOption clanOption in _options.Value.Clans.Where(c => c.Folder?.ToLower() == name.ToLower()))
+                                    clanOption.Folder = null;
+
+                                _options.Value.Clans.Add(new ClanOption(formattedTag, name));
+
+                                _options.Value.Write();
+
+                                await _clansClient.AddOrUpdateAsync(formattedTag, false, true, false, true, false);
+
+                                LogService.LogLine($"Added { formattedTag } { name }");
+                            }
                         }
 
                         if (input == "2")
@@ -72,7 +94,9 @@ namespace MinionBot.Streamers
                             if (string.IsNullOrWhiteSpace(name))
                                 throw new Exception("Invalid input");
 
-                            ClanOption? clan = _options.Value.Clans.FirstOrDefault(c => c.Tag == formattedTag || c.Tag == name || c.Name == name);
+                            ClanOption? clan = _options.Value.Clans.FirstOrDefault(c => c.Tag == formattedTag || c.Folder == name);
+
+                            clan ??= _options.Value.Clans.FirstOrDefault(c => c.Folder != null && c.Folder.ToLower() == name.ToLower());
 
                             if (clan == null)
                                 throw new Exception("Clan not found.");
@@ -96,6 +120,26 @@ namespace MinionBot.Streamers
                             ConfigureSettings();
 
                         if (input == "6")
+                        {
+                            LogService.LogLine($"This information is found in { Program.SettingsJson }");
+
+                            foreach(ClanOption clanOption in _options.Value.Clans)
+                            {
+                                string clanName = "unknown";
+
+                                if (clanOption.Folder != null)
+                                {
+                                    string clanFolder = Path.Combine(Program.ClansFolder, clanOption.Folder, "clan", "name.txt");
+
+                                    if (File.Exists(clanFolder))
+                                        clanName = File.ReadAllText(clanFolder);
+                                }
+
+                                LogService.LogLine($"{clanOption.Tag} {clanName} - { clanOption.Folder }");
+                            }
+                        }
+
+                        if (input == "7")
                         {
                             _hostApplicationLifetime.StopApplication();
                             return;

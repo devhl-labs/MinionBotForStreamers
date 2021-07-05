@@ -4,19 +4,19 @@
     {
         public string Tag { get; set; }
 
-        public string Name { get; set; }
+        public string? Folder { get; set; }
 
         public ClanOption()
         {
 
         }
 
-        public ClanOption(string tag, string name)
+        public ClanOption(string tag, string folder)
         {
             Tag = tag;
-            Name = name;
+            Folder = folder;
         }
 
-        public override string ToString() => $"{Tag} {Name}";
+        public override string ToString() => $"{Tag} {Folder}";
     }
 }

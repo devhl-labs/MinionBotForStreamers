@@ -116,11 +116,11 @@ namespace MinionBot.Streamers
         {
             foreach (ClanOption clanOption in _options.Value.Clans)
             {
-                if (clanWar.Clans.FirstOrDefault(c => c.Value.Tag == clanOption.Tag).Value == null)
+                if (clanOption.Folder == null || clanWar.Clans.FirstOrDefault(c => c.Value.Tag == clanOption.Tag).Value == null)
                     continue;
 
-                string clanFolder = Path.Combine(Program.ClansFolder, clanOption.Name, "clan");
-                string opponentFolder = Path.Combine(Program.ClansFolder, clanOption.Name, "enemy");
+                string clanFolder = Path.Combine(Program.ClansFolder, clanOption.Folder, "clan");
+                string opponentFolder = Path.Combine(Program.ClansFolder, clanOption.Folder, "enemy");
 
                 Directory.CreateDirectory(clanFolder);
                 Directory.CreateDirectory(opponentFolder);
