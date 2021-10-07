@@ -235,7 +235,7 @@ In that case you will have to enter your token and clan tags again.");
             string? input = Console.ReadLine()?.Trim();
 
             if (string.IsNullOrWhiteSpace(input))
-                throw new Exception("Invalid token");            
+                throw new Exception("Invalid input");            
 
             return input;
         }

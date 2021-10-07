@@ -20,7 +20,7 @@ namespace MinionBot.Streamers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IOptions<Settings> _settings;
-
+        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
         public ClansClient(
             IHttpClientFactory httpClientFactory,
@@ -46,31 +46,37 @@ namespace MinionBot.Streamers
 
         private async Task UpdateAsync(CocApi.Model.ClanWar clanWar, bool downloadBadges = false)
         {
-            try
-            {
-                foreach (ClanOption clanOption in _settings.Value.Clans)
-                {
-                    if (clanOption.Folder == null || clanWar.Clans.FirstOrDefault(c => c.Value.Tag == clanOption.Tag).Value == null)
-                        continue;
+            Logger.LogTrace("Running UpdateAsync...");
 
+            foreach (ClanOption clanOption in _settings.Value.Clans.Where(c => clanWar.Clans.Any(cw => c.Tag == cw.Key)))
+            {
+                if (clanOption.Folder == null || clanWar.Clans.FirstOrDefault(c => c.Value.Tag == clanOption.Tag).Value == null)
+                    continue;
+
+                await _semaphoreSlim.WaitAsync();
+
+                try
+                {
                     string clanFolder = Path.Combine(Program.ClansFolder, clanOption.Folder, "clan");
                     string opponentFolder = Path.Combine(Program.ClansFolder, clanOption.Folder, "enemy");
 
+                    Logger.LogTrace("Creating clan folders...");
                     Directory.CreateDirectory(clanFolder);
                     Directory.CreateDirectory(opponentFolder);
 
                     string clanStatsFolder = Path.Combine(clanFolder, "stats");
                     string opponentStatsFolder = Path.Combine(opponentFolder, "stats");
 
+                    Logger.LogTrace("Creating stats folders...");
                     Directory.CreateDirectory(clanStatsFolder);
                     Directory.CreateDirectory(opponentStatsFolder);
 
+                    Logger.LogTrace("Writing stats to files...");
                     File.WriteAllText(Path.Combine(clanFolder, "attacks.txt"), clanWar.Attacks.Count.ToString());
                     File.WriteAllText(Path.Combine(clanFolder, "endTime.txt"), clanWar.EndTime.ToString());
                     File.WriteAllText(Path.Combine(clanFolder, "preparationStartTime.txt"), clanWar.PreparationStartTime.ToString());
                     File.WriteAllText(Path.Combine(clanFolder, "serverExpiration.txt"), clanWar.ServerExpiration.ToString());
                     File.WriteAllText(Path.Combine(clanFolder, "startTime.txt"), clanWar.StartTime.ToString());
-                    ;
                     File.WriteAllText(Path.Combine(clanFolder, "state.txt"), clanWar.State.ToString());
                     File.WriteAllText(Path.Combine(clanFolder, "warTag.txt"), clanWar.WarTag);
 
@@ -83,10 +89,16 @@ namespace MinionBot.Streamers
                         await DownloadBadgesAsync(clanWar.Clans.First(c => c.Key != clanOption.Tag).Value, opponentFolder);
                     }
                 }
-            }
-            catch (Exception err)
-            {
-                Logger.LogError(err, "An error occured at {0}", nameof(UpdateAsync));
+                catch (Exception e)
+                {
+                    Logger.LogError(e, "An exception occured at UpdateAsync");
+
+                    throw;
+                }
+                finally
+                {
+                    _semaphoreSlim.Release();
+                }
             }
         }
 
@@ -124,6 +136,8 @@ namespace MinionBot.Streamers
 
         private void Update(CocApi.Model.ClanWar clanWar, CocApi.Model.WarClan warClan, string clanFolder, string statsFolder)
         {
+            Logger.LogTrace("Running update...");
+
             try
             {
                 File.WriteAllText(Path.Combine(clanFolder, "name.txt"), warClan.Name);
@@ -135,6 +149,8 @@ namespace MinionBot.Streamers
                 File.WriteAllText(Path.Combine(clanFolder, "result.txt"), warClan.Result.ToString());
                 File.WriteAllText(Path.Combine(clanFolder, "stars.txt"), warClan.Stars.ToString());
                 File.WriteAllText(Path.Combine(clanFolder, "tag.txt"), warClan.Tag.ToString());
+
+                Logger.LogTrace("Created various stats files.");
 
                 List<CocApi.Model.ClanWarAttack> bestClanAttacks = new();
 
@@ -180,6 +196,8 @@ namespace MinionBot.Streamers
                         File.WriteAllText(Path.Combine(statsFolder, $"{attackerTh}v{i}Tries.txt"), tries.ToString());
                     }
                 }
+
+                Logger.LogTrace("Done writing files to stats.");
             }
             catch (Exception err)
             {
