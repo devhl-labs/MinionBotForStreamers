@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -21,6 +22,7 @@ namespace MinionBot.Streamers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IOptions<Settings> _settings;
         private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+        private string zeroes;
 
         public ClansClient(
             IHttpClientFactory httpClientFactory,
@@ -207,21 +209,19 @@ namespace MinionBot.Streamers
 
         private string FormatNumber(float value)
         {
-            string format = _settings.Value.DigitsAfterDecimal > 0
-                ? "0."
-                : "0";
+            string percent = _settings.Value.IncludePercentSign ? "%" : string.Empty;
+
+            if (value == 100)
+                return "100" + percent;
+
+            string zeroes = ".";
 
             for (int i = 0; i < _settings.Value.DigitsAfterDecimal; i++)            
-                format = $"{format}0";            
+                zeroes += "0";
 
-            string result = Math.Round(value, _settings.Value.DigitsAfterDecimal).ToString(format);
-
-            if (_settings.Value.TrimTrailingZeroes && result.Split(".").Skip(1).First().ToCharArray().All(x => x.ToString() == "0"))
-                result = Math.Round(value, _settings.Value.DigitsAfterDecimal).ToString();
-
-            return _settings.Value.IncludePercentSign
-                ? $"{result}%"
-                : result;
+            return zeroes == "."
+                ? value.ToString("0") + percent                
+                : value.ToString($"0{zeroes}") + percent;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
