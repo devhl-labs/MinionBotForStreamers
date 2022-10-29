@@ -1,8 +1,13 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
-using CocApi;
+using System.Threading;
+using System.Threading.Tasks;
 using CocApi.Cache;
+using CocApi.Cache.Extensions;
+using CocApi.Rest.Client;
+using CocApi.Rest.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -55,49 +60,71 @@ namespace MinionBot.Streamers
                         .Enrich.FromLogContext()
                         .Enrich.With<UtcTimestampEnricher>();
                 })
-                .ConfigureHostConfiguration(config => config.AddJsonFile(SettingsJsonPath, false, true))                
+                .ConfigureHostConfiguration(config => config.AddJsonFile(SettingsJsonPath, false, true))
                 .ConfigureServices((hostBuilder, services) =>
                 {
                     services.Configure<Settings>(hostBuilder.Configuration.GetSection("Settings"));
 
-                    services.AddCocApi("cocApi", tokenProvider =>
+                    services.AddCocApi(options =>
                     {
                         string token = hostBuilder.Configuration["Settings:Token"];
                         TimeSpan tokenTimeout = TimeSpan.FromMilliseconds(500);
-                        tokenProvider.Tokens.Add(new(token, tokenTimeout));
+                        options.AddTokens(new ApiKeyToken(token, timeout: tokenTimeout));
+
+                        options.AddCocApiHttpClients(
+                            client =>
+                            {
+                                client.BaseAddress = new Uri(hostBuilder.Configuration["Settings:BaseAddress"]);
+                                client.Timeout = TimeSpan.FromSeconds(10000);
+                            },
+                            builder =>
+                            {
+                                builder
+                                    .ConfigurePrimaryHttpMessageHandler(sp => new SocketsHttpHandler()
+                                    {
+                                        MaxConnectionsPerServer = 10
+                                    });
+
+                                if (hostBuilder.Configuration["Settings:UseFastApi"].ToLower() == "true")
+                                    builder.AddHttpMessageHandler(() => new AppendRealTimeQuery());
+                            }
+                        );
                     });
 
                     services.AddCocApiCache<ClansClient, PlayersClient, TimeToLiveProvider>(
-                        (services, dbContextOptions) =>
+                        dbContextOptions =>
                         {
-                            dbContextOptions.UseSqlite($"Data Source={ Path.Combine(DatabaseFolder, "cocapi.cache.sqlite") };Cache=Shared");
-                            CacheDbContext dbContext = new((DbContextOptions<CacheDbContext>) dbContextOptions.Options);
+                            dbContextOptions.UseSqlite($"Data Source={Path.Combine(DatabaseFolder, "cocapi.cache.sqlite")};Cache=Shared");
+                            CacheDbContext dbContext = new((DbContextOptions<CacheDbContext>)dbContextOptions.Options);
                             dbContext.Database.EnsureCreated();
                         },
-                        c =>
+                        options =>
                         {
-                            c.ActiveWars.Enabled = true;
-                            c.ClanMembers.Enabled = false;
-                            c.Clans.Enabled = true;
-                            c.NewCwlWars.Enabled = true;
-                            c.NewWars.Enabled = true;
-                            c.Wars.Enabled = true;
-                            c.CwlWars.Enabled = true;
-                            c.Players.Enabled = false;
+                            options.ActiveWars.Enabled = true;
+                            options.ClanMembers.Enabled = false;
+                            options.Clans.Enabled = true;
+                            options.CwlWars.Enabled = true;
+                            options.NewCwlWars.Enabled = true;
+                            options.NewWars.Enabled = true;
+                            options.Players.Enabled = false;
+                            options.Wars.Enabled = true;
                         });
-
-                    services.AddHttpClient("cocApi", config =>
-                    {
-                        config.BaseAddress = new Uri(hostBuilder.Configuration["Settings:BaseAddress"]);
-                        config.Timeout = TimeSpan.FromSeconds(10000);
-                    })
-                    .ConfigurePrimaryHttpMessageHandler(sp => new SocketsHttpHandler()
-                    {
-                        MaxConnectionsPerServer = 10
-                    });
 
                     services.AddHostedService(services => services.GetRequiredService<ClansClient>());
                     services.AddHostedService<InteractiveMenu>();
                 });
+    }
+
+    public class AppendRealTimeQuery : DelegatingHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            string[] realTimeEligible = new string[] { "currentwar", "warTag" };
+
+            if (realTimeEligible.Any(word => request.RequestUri?.ToString().Contains(word) == true))
+                request.RequestUri = new Uri($"{request.RequestUri}?realtime=true");
+
+            return base.SendAsync(request, cancellationToken);
+        }
     }
 }

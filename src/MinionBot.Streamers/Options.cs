@@ -13,10 +13,11 @@ namespace MinionBot.Streamers
         public int MaxTownhall { get; set; } = CocApi.Clash.MAX_TOWN_HALL_LEVEL;
         public int MinTownhall { get; set; } = 9;
         public List<ClanOption> Clans { get; set; } = new();
+        public bool UseFastApi { get; set; }
 
         public void Write()
         {
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(new UserSettings(this), Newtonsoft.Json.Formatting.Indented);
+            string json = System.Text.Json.JsonSerializer.Serialize(new UserSettings(this));
 
             File.WriteAllText(Program.SettingsJsonPath, json);
         }

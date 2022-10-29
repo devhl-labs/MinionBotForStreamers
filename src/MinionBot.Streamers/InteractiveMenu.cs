@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CocApi;
-using CocApi.Model;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -19,22 +17,22 @@ namespace MinionBot.Streamers
 
         public MenuOption[] MainMenu => new MenuOption[]
         {
-            new("Add a clan", AddAClan), 
-            new("Remove a clan", RemoveAClan), 
-            new("Settings", ConfigureSettings), 
-            new("View all clans", ViewAllClans), 
-            new("About", About),
-            new("Quit", null)
+        new("Add a clan", AddAClan),
+        new("Remove a clan", RemoveAClan),
+        new("Settings", ConfigureSettings),
+        new("View all clans", ViewAllClans),
+        new("About", About),
+        new("Quit", null)
         };
         public MenuOption[] SettingsMenu => new MenuOption[]
         {
-            new("Add your token", ConfigureToken),
-            new("Configure decimals", ConfigureDigitsAfterDecimal),
-            new("Configure percent sign", ConfigureIncludePercentSign),
-            new("Set minimum townhall", ConfigureMinimumTownhall),
-            new("Set maximum townhall", ConfigureMaximumTownhall),
-            new("Toggle trim trailing zeroes.", ConfigureTrailingZeroes),
-            new("Main menu", null)
+        new("Add your token", ConfigureToken),
+        new("Configure decimals", ConfigureDigitsAfterDecimal),
+        new("Configure percent sign", ConfigureIncludePercentSign),
+        new("Set minimum townhall", ConfigureMinimumTownhall),
+        new("Set maximum townhall", ConfigureMaximumTownhall),
+        new("Toggle trim trailing zeroes.", ConfigureTrailingZeroes),
+        new("Main menu", null)
         };
         public IOptions<Settings> Settings { get; }
         public ClansClient ClansClient { get; }
@@ -42,9 +40,9 @@ namespace MinionBot.Streamers
 
 
         public InteractiveMenu(
-            ILogger<InteractiveMenu> logger, 
-            IHostApplicationLifetime hostApplicationLifetime, 
-            ClansClient clansClient, 
+            ILogger<InteractiveMenu> logger,
+            IHostApplicationLifetime hostApplicationLifetime,
+            ClansClient clansClient,
             IOptions<Settings> settings)
         {
             Logger = logger;
@@ -55,8 +53,8 @@ namespace MinionBot.Streamers
 
         private static void PrintMenu(MenuOption[] menu)
         {
-            for (int i = 0; i < menu.Length; i++)            
-                Console.WriteLine($"{i + 1}. {menu[i].Option}");            
+            for (int i = 0; i < menu.Length; i++)
+                Console.WriteLine($"{i + 1}. {menu[i].Option}");
 
             Console.WriteLine("Choose an option:");
         }
@@ -78,7 +76,7 @@ namespace MinionBot.Streamers
                 }
                 catch (Exception e)
                 {
-                    commands.Logger.LogError(e, "An error occured at {0}", nameof(ConfigureSettings));
+                    commands.Logger.LogError(e, "An error occured at {configureSettings}", nameof(ConfigureSettings));
                 }
             }
 
@@ -99,7 +97,7 @@ namespace MinionBot.Streamers
             if (exists != null)
             {
                 Console.WriteLine(
-$"This clan tag is already entered. The folder name is { commands.Settings.Value.Clans.First(c => c.Tag == formattedTag).Folder ?? "null" }. Enter the new folder name, or just press enter.");
+    $"This clan tag is already entered. The folder name is {commands.Settings.Value.Clans.First(c => c.Tag == formattedTag).Folder ?? "null"}. Enter the new folder name, or just press enter.");
 
                 string? newFolderName = Console.ReadLine();
 
@@ -126,7 +124,7 @@ $"This clan tag is already entered. The folder name is { commands.Settings.Value
 
                 await commands.ClansClient.AddOrUpdateAsync(formattedTag, false, true, false, true, false);
 
-                Console.WriteLine($"Added { formattedTag } { name }");
+                Console.WriteLine($"Added {formattedTag} {name}");
             }
         }
 
@@ -155,16 +153,16 @@ $"This clan tag is already entered. The folder name is { commands.Settings.Value
 
             await commands.ClansClient.AddOrUpdateAsync(clan.Tag, false, false, false, false, false);
 
-            Console.WriteLine($"Removed { clan }");
+            Console.WriteLine($"Removed {clan}");
         }
 
         private static async Task ViewAllClans(InteractiveMenu commands)
         {
             foreach (ClanOption clanOption in commands.Settings.Value.Clans)
             {
-                Clan clan = await commands.ClansClient.GetOrFetchClanAsync(clanOption.Tag);
+                CocApi.Rest.Models.Clan clan = await commands.ClansClient.GetOrFetchClanAsync(clanOption.Tag);
 
-                Console.WriteLine($"{clanOption.Tag} {clan.Name} Folder: { clanOption.Folder }");
+                Console.WriteLine($"{clanOption.Tag} {clan.Name} Folder: {clanOption.Folder}");
             }
         }
 
@@ -235,7 +233,7 @@ In that case you will have to enter your token and clan tags again.");
             string? input = Console.ReadLine()?.Trim();
 
             if (string.IsNullOrWhiteSpace(input))
-                throw new Exception("Invalid input");            
+                throw new Exception("Invalid input");
 
             return input;
         }
@@ -312,7 +310,7 @@ In that case you will have to enter your token and clan tags again.");
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e, "An error occured at {0}", nameof(StartAsync));
+                    Logger.LogError(e, "An error occured at {startAsync}", nameof(StartAsync));
                 }
             }
         }

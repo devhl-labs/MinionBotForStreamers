@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CocApi.Cache;
-using CocApi.Client;
+using CocApi.Rest.Client;
 using Microsoft.Extensions.Logging;
 
 namespace MinionBot.Streamers

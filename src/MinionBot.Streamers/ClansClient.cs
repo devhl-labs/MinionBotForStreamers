@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using CocApi.Api;
 using CocApi.Cache;
 using CocApi.Cache.Services;
-using CocApi.Client;
+using CocApi.Cache.Services.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -21,20 +19,23 @@ namespace MinionBot.Streamers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IOptions<Settings> _settings;
-        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
-        private string zeroes;
+        private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
         public ClansClient(
             IHttpClientFactory httpClientFactory,
             ILogger<ClansClient> logger,
-            ClansApi clansApi,
+            CocApi.Rest.IApis.IClansApi clansApi,
             IServiceScopeFactory scopeFactory,
             Synchronizer synchronizer,
-            IPerpetualExecution<object>[] backgroundServices,
+            ClanService clanService,
+            NewWarService newWarService,
+            NewCwlWarService newCwlWarService,
+            WarService warService,
+            CwlWarService cwlWarService,
             IOptions<CacheOptions> cacheOptions,
             IOptions<Settings> settings
         ) : base(
-            logger, clansApi, scopeFactory, synchronizer, backgroundServices, cacheOptions)
+            logger, clansApi, scopeFactory, synchronizer, clanService, newWarService, newCwlWarService, warService, cwlWarService, cacheOptions)
         {
             _httpClientFactory = httpClientFactory;
             ClanWarAdded += ClansClient_ClanWarAdded;
@@ -42,11 +43,11 @@ namespace MinionBot.Streamers
             _settings = settings;
         }
 
-        private async Task ClansClient_ClanWarUpdated(object sender, ClanWarUpdatedEventArgs e) => await UpdateAsync(e.Fetched);        
+        private async Task ClansClient_ClanWarUpdated(object sender, ClanWarUpdatedEventArgs e) => await UpdateAsync(e.Fetched);
 
-        private async Task ClansClient_ClanWarAdded(object sender, WarAddedEventArgs e) => await UpdateAsync(e.War, true);        
+        private async Task ClansClient_ClanWarAdded(object sender, WarAddedEventArgs e) => await UpdateAsync(e.War, true);
 
-        private async Task UpdateAsync(CocApi.Model.ClanWar clanWar, bool downloadBadges = false)
+        private async Task UpdateAsync(CocApi.Rest.Models.ClanWar clanWar, bool downloadBadges = false)
         {
             Logger.LogTrace("Running UpdateAsync...");
 
@@ -104,7 +105,7 @@ namespace MinionBot.Streamers
             }
         }
 
-        private async Task DownloadBadgesAsync(CocApi.Model.WarClan warClan, string folder)
+        private async Task DownloadBadgesAsync(CocApi.Rest.Models.WarClan warClan, string folder)
         {
             HttpClient httpClient = _httpClientFactory.CreateClient();
 
@@ -136,7 +137,7 @@ namespace MinionBot.Streamers
             }
         }
 
-        private void Update(CocApi.Model.ClanWar clanWar, CocApi.Model.WarClan warClan, string clanFolder, string statsFolder)
+        private void Update(CocApi.Rest.Models.ClanWar clanWar, CocApi.Rest.Models.WarClan warClan, string clanFolder, string statsFolder)
         {
             Logger.LogTrace("Running update...");
 
@@ -154,13 +155,13 @@ namespace MinionBot.Streamers
 
                 Logger.LogTrace("Created various stats files.");
 
-                List<CocApi.Model.ClanWarAttack> bestClanAttacks = new();
+                List<CocApi.Rest.Models.ClanWarAttack> bestClanAttacks = new();
 
-                CocApi.Model.ClanWarAttack[] clanAttacks = clanWar.Attacks.Where(a => a.AttackerClanTag == warClan.Tag && a.DefenderTag != null).ToArray();
+                CocApi.Rest.Models.ClanWarAttack[] clanAttacks = clanWar.Attacks.Where(a => a.AttackerClanTag == warClan.Tag && a.DefenderTag != null).ToArray();
 
                 var grouped = clanAttacks.GroupBy(a => a.DefenderTag);
 
-                foreach (IGrouping<string, CocApi.Model.ClanWarAttack> group in grouped)
+                foreach (IGrouping<string, CocApi.Rest.Models.ClanWarAttack> group in grouped)
                     bestClanAttacks.Add(group
                         .OrderByDescending(a => a.Stars)
                         .ThenByDescending(a => a.DestructionPercentage)
@@ -180,8 +181,8 @@ namespace MinionBot.Streamers
                         if (attackerTh < _settings.Value.MinTownhall || attackerTh > _settings.Value.MaxTownhall)
                             continue;
 
-                        CocApi.Model.ClanWarAttack[] scope = clanAttacks.Where(a => a.AttackerTownHall == attackerTh && a.DefenderTownHall == i).ToArray();
-                        CocApi.Model.ClanWarAttack[] scopeBest = bestClanAttacks.Where(a => a.AttackerTownHall == attackerTh && a.DefenderTownHall == i).ToArray();
+                        CocApi.Rest.Models.ClanWarAttack[] scope = clanAttacks.Where(a => a.AttackerTownHall == attackerTh && a.DefenderTownHall == i).ToArray();
+                        CocApi.Rest.Models.ClanWarAttack[] scopeBest = bestClanAttacks.Where(a => a.AttackerTownHall == attackerTh && a.DefenderTownHall == i).ToArray();
 
                         int tries = scope.Length;
                         int threes = scopeBest.Count(a => a.Stars == 3);
@@ -216,24 +217,24 @@ namespace MinionBot.Streamers
 
             string zeroes = ".";
 
-            for (int i = 0; i < _settings.Value.DigitsAfterDecimal; i++)            
+            for (int i = 0; i < _settings.Value.DigitsAfterDecimal; i++)
                 zeroes += "0";
 
             return zeroes == "."
-                ? value.ToString("0") + percent                
+                ? value.ToString("0") + percent
                 : value.ToString($"0{zeroes}") + percent;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(_settings.Value.Token) || _settings.Value.Token == "put your token here")            
+            if (string.IsNullOrWhiteSpace(_settings.Value.Token) || _settings.Value.Token == "put your token here")
                 throw InvalidToken();
 
             try
             {
                 await ClansApi.FetchClanAsync("#929YJPYJ", cancellationToken);
             }
-            catch (ApiException e) when (e.Message == "Forbidden")
+            catch (CocApi.Rest.Client.ApiException e) when (e.Message == "Forbidden")
             {
                 throw InvalidToken();
             }
@@ -242,7 +243,7 @@ namespace MinionBot.Streamers
         private Exception InvalidToken()
         {
             string input = InteractiveMenu.GetStringInput(
-@"You don't have a token set or it is not valid. You an get a token from developer.clashofclans.com.
+    @"You don't have a token set or it is not valid. You an get a token from developer.clashofclans.com.
 You will also need your public IPv4 address. You can get that from whatismyipaddress.com
 
 Enter your clash of clans token:");
