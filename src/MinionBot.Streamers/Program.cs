@@ -86,7 +86,10 @@ namespace MinionBot.Streamers
                                     });
 
                                 if (hostBuilder.Configuration["Settings:UseFastApi"].ToLower() == "true")
+                                {
                                     builder.AddHttpMessageHandler(() => new AppendRealTimeQuery());
+                                    builder.AddHttpMessageHandler(() => new PatchResponse());
+                                }
                             }
                         );
                     });
@@ -125,6 +128,25 @@ namespace MinionBot.Streamers
                 request.RequestUri = new Uri($"{request.RequestUri}?realtime=true");
 
             return base.SendAsync(request, cancellationToken);
+        }
+    }
+
+    public class PatchResponse : DelegatingHandler
+    {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            string[] realTimeEligible = new string[] { "currentwar", "warTag" };
+
+            if (realTimeEligible.Any(word => request.RequestUri?.ToString().Contains(word) == true))
+            {
+                HttpResponseMessage result = await base.SendAsync(request, cancellationToken);
+
+                result.Headers.CacheControl = null;
+
+                return result;
+            }
+
+            return await base.SendAsync(request, cancellationToken);
         }
     }
 }
