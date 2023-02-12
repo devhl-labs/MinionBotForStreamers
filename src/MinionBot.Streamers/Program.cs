@@ -141,7 +141,9 @@ namespace MinionBot.Streamers
             {
                 HttpResponseMessage result = await base.SendAsync(request, cancellationToken);
 
-                result.Headers.CacheControl = null;
+                result.Headers.CacheControl ??= new System.Net.Http.Headers.CacheControlHeaderValue();
+
+                result.Headers.CacheControl.MaxAge = TimeSpan.Zero;
 
                 return result;
             }
