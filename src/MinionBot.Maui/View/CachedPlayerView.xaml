@@ -7,7 +7,7 @@
              xmlns:model="clr-namespace:MinionBot.Maui.Models"
              xmlns:viewmodel="clr-namespace:MinionBot.Maui.ViewModels"
              x:DataType="viewmodel:CachedPlayerViewModel"
-             Title="Villages">
+>
 
     <Grid ColumnDefinitions="*,*" ColumnSpacing="5" RowDefinitions="*,Auto">
         <CollectionView Grid.ColumnSpan="2" ItemsSource="{Binding Players}" SelectionMode="None">

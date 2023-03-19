@@ -2,16 +2,14 @@
 <Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MinionBot.Maui"
-             x:Class="MinionBot.Maui.App">
+             x:Class="MinionBot.Maui.App"
+             xmlns:views="clr-namespace:MinionBot.Maui.View">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-
-
 
             <Color x:Key="Primary">#FFC107</Color>
             <Color x:Key="PrimaryDark">#FFA000</Color>
@@ -73,11 +71,32 @@
                 <Setter Property="IsClippedToBounds" Value="True"/>
             </Style>
 
-
-
-
-
-
         </ResourceDictionary>
     </Application.Resources>
+
+    <Application.MainPage>
+        <Shell>
+            <TabBar>
+                <Tab Title="Villages">
+                    <ShellContent ContentTemplate="{DataTemplate views:CachedPlayerView}"/>
+                </Tab>
+                <Tab Title="Clans">
+                    <ShellContent ContentTemplate="{DataTemplate views:CachedPlayerView}"/>
+                </Tab>
+                <Tab Title="Settings">
+                    <ShellContent ContentTemplate="{DataTemplate views:SettingsView}"/>
+                </Tab>
+                <Tab Title="About">
+                    <ShellContent ContentTemplate="{DataTemplate views:CachedPlayerView}"/>
+                </Tab>
+            </TabBar>
+            <ShellContent
+                Title="Minion Bot"
+                ContentTemplate="{DataTemplate views:CachedPlayerView}"
+                Route="CachedPlayerView"
+                Shell.NavBarIsVisible="False">
+            </ShellContent>
+
+        </Shell>
+    </Application.MainPage>
 </Application>

@@ -2,6 +2,7 @@
 using CocApi.Cache.Extensions;
 using CocApi.Rest.Client;
 using CocApi.Rest.Extensions;
+using CocApi.Cache.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,7 @@ namespace MinionBot.Maui
             hostBuilder.ConfigureLifecycleEvents(events =>
                 {
 #if WINDOWS
-                    events.AddWindows(windows =>
+                    object value = events.AddWindows(windows =>
                         windows.OnClosed((Window, AccelerometerChangedEventArgs) =>
                         {
                             CachingService cachingService = MinionBot.Maui.WinUI.App.MauiApp.Services.GetRequiredService<CachingService>();
@@ -53,7 +54,9 @@ namespace MinionBot.Maui
             hostBuilder.Logging.AddSerilog(logger, dispose: true);
 
             hostBuilder.Services.AddSingleton<CachedPlayerViewModel>();
+            hostBuilder.Services.AddSingleton<SettingsViewModel>();
             hostBuilder.Services.AddSingleton<CachedPlayerView>();
+            hostBuilder.Services.AddSingleton<SettingsView>();
 
             hostBuilder.Services.Configure<Settings>(hostBuilder.Configuration.GetSection("Settings"));
             hostBuilder.Services.AddCocApi(options =>

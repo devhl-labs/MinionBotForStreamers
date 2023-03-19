@@ -1,6 +1,6 @@
 ﻿namespace MinionBot.Maui.Models
 {
-    internal class Settings
+    public class Settings
     {
         public string BaseAddress { get; set; } = "https://api.clashofclans.com/v1";
         public bool TrimTrailingZeroes { get; set; } = true;

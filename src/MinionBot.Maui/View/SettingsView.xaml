@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MinionBot.Maui.View.SettingsView"
+             xmlns:model="clr-namespace:MinionBot.Maui.Models"
+             xmlns:viewmodel="clr-namespace:MinionBot.Maui.ViewModels"
+             x:DataType="viewmodel:SettingsViewModel"
+             xmlns:CocApi="clr-namespace:CocApi;assembly=CocApi"
+>
+
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="5" RowDefinitions="*,Auto">
+        <VerticalStackLayout Margin="8">
+            <Label Style="{StaticResource LargeLabel}" Text="Token"/>
+            <Entry Text="{Binding Settings.Value.Token}" TextColor="Black"></Entry>
+
+            <Label Style="{StaticResource LargeLabel}" Text="Min Townhall"/>
+            <HorizontalStackLayout>
+                <Slider 
+                x:Name="MinTownhallSlider"
+                Minimum="1"
+                Maximum="{Binding MAX_TOWN_HALL_LEVEL}"
+                Value="{Binding Settings.Value.MinTownhall}"
+                MaximumTrackColor="LightBlue"
+                MinimumTrackColor="DarkBlue"
+                MinimumWidthRequest="200"
+                ValueChanged="OnMinTownhallChanged"></Slider>
+                <Label Style="{StaticResource MediumLabel}" Text="{Binding Source={x:Reference MinTownhallSlider},Path=Value}"/>
+            </HorizontalStackLayout>
+
+            <Label Style="{StaticResource LargeLabel}" Text="Max Townhall"/>
+            <HorizontalStackLayout>
+                <Slider 
+                x:Name="MaxTownhallSlider"
+                Minimum="1"
+                Maximum="{Binding MAX_TOWN_HALL_LEVEL}"
+                Value="{Binding Settings.Value.MaxTownhall}"
+                MaximumTrackColor="LightBlue"
+                MinimumTrackColor="DarkBlue"
+                MinimumWidthRequest="200"
+                ValueChanged="OnMaxTownhallChanged"></Slider>
+                <Label Style="{StaticResource MediumLabel}" Text="{Binding Source={x:Reference MaxTownhallSlider},Path=Value}"/>
+            </HorizontalStackLayout>
+
+            <Label Style="{StaticResource LargeLabel}" Text="Realtime Updates"/>
+            <CheckBox IsChecked="{Binding Settings.Value.UseFastApi}"></CheckBox>
+
+            <Label Style="{StaticResource LargeLabel}" Text="Trim Trailing Zeroes"/>
+            <CheckBox IsChecked="{Binding Settings.Value.TrimTrailingZeroes}"></CheckBox>
+
+            <Label Style="{StaticResource LargeLabel}" Text="Use Fast API"/>
+            <CheckBox IsChecked="{Binding Settings.Value.UseFastApi}"></CheckBox>
+
+            <Label Style="{StaticResource LargeLabel}" Text="Digits After Decimal"/>
+            <HorizontalStackLayout>
+                <Stepper x:Name="DigitsAfterDecimalStepper" Minimum="0" Maximum="10" Value="{Binding Settings.Value.DigitsAfterDecimal}" BackgroundColor="Black"></Stepper>
+                <Label Style="{StaticResource MediumLabel}" Text="{Binding Source={x:Reference DigitsAfterDecimalStepper},Path=Value}"/>
+            </HorizontalStackLayout>
+
+            <Label Style="{StaticResource LargeLabel}" Text="Include Percent Sign"/>
+            <CheckBox IsChecked="{Binding Settings.Value.IncludePercentSign}"></CheckBox>
+        </VerticalStackLayout>
+        <Button Text="Save" Style="{StaticResource ButtonOutline}" Command="{Binding SaveCommand}"  Grid.Row="1" Margin="8"></Button>
+    </Grid>
+</ContentPage>

@@ -1,12 +1,11 @@
-﻿namespace MinionBot.Maui
-{
-    public partial class App : Application
-    {
-        public App()
-        {
-            InitializeComponent();
+﻿using MinionBot.Maui.View;
 
-            MainPage = new AppShell();
-        }
+namespace MinionBot.Maui;
+
+public partial class App : Application
+{
+    public App()
+    {
+        InitializeComponent();
     }
 }
