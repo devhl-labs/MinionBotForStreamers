@@ -1,4 +1,5 @@
-﻿using MinionBot.Maui.View;
+﻿using Microsoft.Maui.Platform;
+using MinionBot.Maui.View;
 
 namespace MinionBot.Maui;
 

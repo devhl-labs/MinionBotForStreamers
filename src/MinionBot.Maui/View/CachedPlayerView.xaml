@@ -7,8 +7,19 @@
              xmlns:model="clr-namespace:MinionBot.Maui.Models"
              xmlns:viewmodel="clr-namespace:MinionBot.Maui.ViewModels"
              x:DataType="viewmodel:CachedPlayerViewModel"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
 >
-
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior EventName="Loaded" Command="{Binding GetPlayersCommand}"/>
+    </ContentPage.Behaviors>
+    <ContentPage.Resources>
+        <Style x:Key="InvalidEntryStyle" TargetType="Entry">
+            <Setter Property="TextColor" Value="Red" />
+        </Style>
+        <Style x:Key="ValidEntryStyle" TargetType="Entry">
+            <Setter Property="TextColor" Value="Green" />
+        </Style>
+    </ContentPage.Resources>
     <Grid ColumnDefinitions="*,*" ColumnSpacing="5" RowDefinitions="*,Auto">
         <CollectionView Grid.ColumnSpan="2" ItemsSource="{Binding Players}" SelectionMode="None">
             <CollectionView.ItemTemplate>
@@ -31,14 +42,26 @@
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-
                         </Frame>
                     </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Text="Add Village" Grid.Row="1" Margin="8" Command="{Binding GetPlayersCommand}" IsEnabled="{Binding IsNotBusy}" Style="{StaticResource ButtonOutline}"/>
+        <HorizontalStackLayout VerticalOptions="End" HorizontalOptions="CenterAndExpand">
+            <Entry Placeholder="#00000" MinimumWidthRequest="100" WidthRequest="100" BackgroundColor="LightGray" Text="{Binding NewPlayerTag}">
+                <Entry.Behaviors>
+                    <toolkit:TextValidationBehavior 
+                        InvalidStyle="{StaticResource InvalidEntryStyle}"
+                        ValidStyle="{StaticResource ValidEntryStyle}"
+                        Flags="ValidateOnValueChanged"
+                        RegexPattern="^[PYLQGRJCUV0289]{3,9}$"
+                        RegexOptions="IgnoreCase"
+                        />
+                </Entry.Behaviors>
+            </Entry>
+            <Button Text="Add Village" Grid.Row="1" Margin="8" Command="{Binding AddPlayerCommand}" IsEnabled="{Binding IsNotBusy}" Style="{StaticResource ButtonOutline}"/>
+        </HorizontalStackLayout>
 
         <ActivityIndicator
             IsVisible="{Binding IsBusy}"

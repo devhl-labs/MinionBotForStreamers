@@ -11,7 +11,7 @@
     <Grid ColumnDefinitions="*,*" ColumnSpacing="5" RowDefinitions="*,Auto">
         <VerticalStackLayout Margin="8">
             <Label Style="{StaticResource LargeLabel}" Text="Token"/>
-            <Entry Text="{Binding Settings.Value.Token}" TextColor="Black"></Entry>
+            <Entry Text="{Binding Settings.Value.Token}" TextColor="Black" IsPassword="True"></Entry>
 
             <Label Style="{StaticResource LargeLabel}" Text="Min Townhall"/>
             <HorizontalStackLayout>

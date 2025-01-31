@@ -11,6 +11,8 @@ using MinionBot.Maui.Models;
 using Serilog;
 using MinionBot.Maui.ViewModels;
 using MinionBot.Maui.View;
+using MinionBot.Maui.Services;
+using CommunityToolkit.Maui;
 
 namespace MinionBot.Maui
 {
@@ -27,6 +29,7 @@ namespace MinionBot.Maui
 
             var hostBuilder = MauiApp.CreateBuilder()
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -36,6 +39,7 @@ namespace MinionBot.Maui
                 {
 #if WINDOWS
                     object value = events.AddWindows(windows =>
+                    {
                         windows.OnClosed((Window, AccelerometerChangedEventArgs) =>
                         {
                             CachingService cachingService = MinionBot.Maui.WinUI.App.MauiApp.Services.GetRequiredService<CachingService>();
@@ -43,7 +47,16 @@ namespace MinionBot.Maui
                             cachingService.StopAsync();
 
                             Serilog.Log.CloseAndFlush();
-                        }));
+                        });
+
+                        //windows.OnActivated(window =>
+                        //{
+                        //    //CachingService cachingService = MinionBot.Maui.WinUI.App.MauiApp.Services.GetRequiredService<CachingService>();
+
+                        //    //cachingService.StartAsync();
+                        //    string a = "";
+                        //});
+                    });
 #endif
                 });
 
@@ -105,9 +118,27 @@ namespace MinionBot.Maui
                     options.NewWars.Enabled = true;
                     options.Players.Enabled = true;
                     options.Wars.Enabled = true;
+
+                    options.Clans.DownloadClan = true;
+                    options.Clans.DownloadGroup = true;
+                    options.Clans.DelayBeforeExecution = TimeSpan.MinValue;
+                    options.Clans.DownloadCurrentWar = true;
+                    options.Clans.DownloadGroup = true;
+                    options.Clans.Enabled = true;
                 });
 
-            return hostBuilder.Build();
+            var host = hostBuilder.Build();
+
+            //var cocApi = MinionBot.Maui.WinUI.App.MauiApp.Services.GetRequiredService<CachingService>();
+            CachingService cachingService = host.Services.GetRequiredService<CachingService>();
+
+            _ = Task.Run(() =>
+            {
+                cachingService.StartAsync();
+            });
+
+
+            return host;
         }
 
         private static void CreateUserSettingsFile()
@@ -125,6 +156,8 @@ namespace MinionBot.Maui
             logger.ReadFrom.Configuration(configuration, Serilog.Settings.Configuration.ConfigurationAssemblySource.AlwaysScanDllFiles)
                 .Enrich.FromLogContext()
                 .Enrich.With<UtcTimestampEnricher>();
+
+            logger.WriteTo.File(LogPath);
 
 #if DEBUG
             logger.WriteTo.Debug();
