@@ -69,7 +69,7 @@ namespace MinionBot.Streamers
                     {
                         string token = hostBuilder.Configuration["Settings:Token"];
                         TimeSpan tokenTimeout = TimeSpan.FromMilliseconds(500);
-                        options.AddTokens(new ApiKeyToken(token, timeout: tokenTimeout));
+                        options.AddTokens(new ApiKeyToken(token, ClientUtils.ApiKeyHeader.Authorization, timeout: tokenTimeout));
 
                         options.AddCocApiHttpClients(
                             client =>

@@ -13,7 +13,7 @@ namespace MinionBot.Streamers
 
         }
 
-        protected override ValueTask<TimeSpan> TimeToLiveAsync<T>(ApiResponse<T> apiResponse) => new(TimeSpan.MinValue);
+        protected override ValueTask<TimeSpan> TimeToLiveAsync<T>(IOk<T> apiResponse) => new(TimeSpan.MinValue);
 
         protected override ValueTask<TimeSpan> TimeToLiveAsync<T>(Exception exception) => new(TimeSpan.FromSeconds(15));
     }

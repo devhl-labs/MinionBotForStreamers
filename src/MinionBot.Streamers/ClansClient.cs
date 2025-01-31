@@ -24,7 +24,7 @@ namespace MinionBot.Streamers
         public ClansClient(
             IHttpClientFactory httpClientFactory,
             ILogger<ClansClient> logger,
-            CocApi.Rest.IApis.IClansApi clansApi,
+            CocApi.Rest.Apis.IClansApi clansApi,
             IServiceScopeFactory scopeFactory,
             Synchronizer synchronizer,
             ClanService clanService,
